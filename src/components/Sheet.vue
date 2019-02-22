@@ -176,7 +176,6 @@
                 this.isNew = false;
                 this.selectedSlot = slot;
 
-
                 this.time = slot.time;
                 this.description = slot.description;
                 this.period = slot.period;
@@ -187,6 +186,7 @@
                 this.showModal = true;
                 this.isNew = true;
 
+                this.date = '';
                 this.time = '';
                 this.description = '';
                 this.period = '';
