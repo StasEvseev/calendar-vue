@@ -15,14 +15,14 @@ import Sheet from "./components/Sheet.vue";
 
 
 function calculateDays(month, year) {
-  let today = new Date(year, month, 0);
-  let lastDayOfPrevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
-  let firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-  let lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-  let lastDayOfMonthDay = lastDayOfMonth.getDate();
-  let firstOfMonthWeek = firstOfMonth.getDay();
+    let today = new Date(year, month, 0);
+    let lastDayOfPrevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+    let firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    let lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    let lastDayOfMonthDay = lastDayOfMonth.getDate();
+    let firstOfMonthWeek = firstOfMonth.getDay();
 
-  let days = [0, 0, 0, 0, 0, 0, 0];
+    let days = [0, 0, 0, 0, 0, 0, 0];
     let value = lastDayOfPrevMonth.getDate();
 
     for (let i = firstOfMonthWeek - 2; i >= 0; i--) {
@@ -44,6 +44,10 @@ function calculateDays(month, year) {
             if (value === lastDayOfMonthDay) {
                 last_day_passed = true;
                 value = 1;
+                // debugger
+                if (m === 0) {
+                    break
+                }
             } else {
                 value += 1;
             }
@@ -75,8 +79,8 @@ export default {
   },
     methods: {
       resetMonth: function (v, v2) {
-          console.log(v.month + 1);
-          this.days = calculateDays(v.month + 1);
+          console.log(v, v2);
+          this.days = calculateDays(v.month + 1, v.year);
       }
     },
   components: {

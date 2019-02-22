@@ -18,7 +18,7 @@
     </button>
 
     <span>
-      {{currentMonth}} {{currentYear}}
+      {{monthsCollection[month['month']]}} {{month['year']}}
     </span>
 
   </div>
@@ -27,14 +27,11 @@
 
 <script>
   const monthsCollection = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
-  // let index_ = 0;
 export default {
     name: 'Month',
     data() {
         return {
-            months: monthsCollection,
-            currentMonth: monthsCollection[this.month['month']],
-            currentYear: this.month['year'],
+            monthsCollection: monthsCollection,
         }
     },
     props: [
@@ -45,21 +42,17 @@ export default {
           if (this.month['month'] === 0) {
               this.month['month'] = 11;
               this.month['year'] -= 1;
-              this.currentYear -= 1;
           } else {
               this.month['month'] -= 1;
           }
-          this.currentMonth = monthsCollection[this.month['month']];
       },
       nextMonth: function () {
           if (this.month['month'] === 11) {
               this.month['month'] = 0;
               this.month['year'] += 1;
-              this.currentYear += 1;
           } else {
               this.month['month'] += 1;
           }
-          this.currentMonth = monthsCollection[this.month['month']];
       }
     }
 }
