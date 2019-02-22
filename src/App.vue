@@ -13,7 +13,10 @@
     import Sheet from "./components/Sheet.vue";
 
 
-    function calculateDays(month, year) {
+    function collectArrayOfDays(month, year) {
+        /*
+        * TODO: refactor it
+        * */
         let today = new Date(year, month, 0);
         let lastDayOfPrevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
         let firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -73,16 +76,24 @@
 
     let today = new Date();
 
-    let days = calculateDays(today.getMonth() + 1, today.getFullYear());
-    let slots = {2019: {1: {21: [{id: 'ID1', time:'10AM', description: 'meeting', period: '1h', countParticipant: 3}]}}};
+    let days = collectArrayOfDays(today.getMonth() + 1, today.getFullYear());
+    let slots = {
+        2019: {
+            1: {
+                21: [
+                    {id: 'ID1', timeFrom:'10:00 AM', timeTo: '12:00 AM', description: 'meeting', period: '1h', countParticipant: 3}
+                ]
+            }
+        }
+    };
 
-    let obj = {month: today.getMonth(), year: today.getFullYear()};
+    let monthYear = {month: today.getMonth(), year: today.getFullYear()};
 
     export default {
         name: 'app',
         data: () => ({
             days: days,
-            month: obj,
+            month: monthYear,
             today: today,
             slots: slots,
         }),
@@ -96,8 +107,7 @@
             },
         methods: {
             resetMonth: function (v, v2) {
-                console.log(v, v2);
-                this.days = calculateDays(v.month + 1, v.year);
+                this.days = collectArrayOfDays(v.month + 1, v.year);
             }
         },
         components: {

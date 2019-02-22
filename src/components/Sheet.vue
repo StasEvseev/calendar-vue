@@ -1,12 +1,11 @@
 <template>
     <div>
 
-
         <b-modal
                 id="modalPrevent"
                 v-model="showModal"
                 ref="modal"
-                title="Новое значение"
+                title="Новое событие"
                 @ok="handleOk"
         >
             <form @submit.stop.prevent="">
@@ -16,17 +15,33 @@
                     <!--<datepicker v-if="modal.isNew" v-model="modal.date"></datepicker>-->
                 </b-form-group>
 
-                <b-form-group label="Время">
-                    <date-picker v-model="modal.time" :config="modal.timepicker.options" />
-                    <!--<b-form-input type="text" placeholder="Время" v-model="modal.time"/>-->
+                <b-form-group label="Время от">
+                    <date-picker v-model="modal.timeFrom" :config="modal.timepicker.options" />
+                </b-form-group>
+
+                <b-form-group label="Время до">
+                    <date-picker v-model="modal.timeTo" :config="modal.timepicker.options" />
+                </b-form-group>
+
+                <b-form-checkbox
+                  id="checkbox1"
+                  v-model="modal.wholeDay"
+                >
+                  Интервал на весь день
+                </b-form-checkbox>
+
+                <b-form-group v-if="modal.wholeDay" label="Длительность">
+                    <b-form-input type="text" placeholder="Значение" v-model="modal.typeRange.value"/>
+                    <b-form-select v-model="modal.typeRange.selected" :options="modal.typeRange.options" size="sm" class="mt-3" />
+                </b-form-group>
+
+                <b-form-group v-if="modal.wholeDay" label="Интервал слота">
+                    <b-form-input type="text" placeholder="Значение" v-model="modal.typeInterval.value"/>
+                    <b-form-select v-model="modal.typeInterval.selected" :options="modal.typeInterval.options" size="sm" class="mt-3" />
                 </b-form-group>
 
                 <b-form-group label="Описание">
                     <b-form-input type="text" placeholder="Описание" v-model="modal.description"/>
-                </b-form-group>
-
-                <b-form-group label="Продолжительность">
-                    <b-form-input type="text" placeholder="Продолжительность" v-model="modal.period"/>
                 </b-form-group>
 
                 <b-form-group label="Количество участников">
@@ -55,7 +70,7 @@
                           <span class="calendar-event"
                                 style="">
                             <span>
-                              {{slot.time}}
+                              {{slot.timeFrom}}
                             </span>
 
                             <span>
@@ -86,6 +101,16 @@
     import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css';
     import moment from 'moment'
 
+    const Format = {
+        dateFormat: 'DD/MM/YYYY',
+        timeFormat: 'LT'
+    };
+
+    const RangeType = {
+        MINUTE: 'minute',
+        HOUR: 'hour'
+    };
+
 
     export default {
         name: 'Sheet',
@@ -98,23 +123,42 @@
 
                 modal: {
                     date: '',
-                    time: '',
+                    timeFrom: '',
+                    timeTo: '',
                     description: '',
                     period: '',
                     countParticipant: '',
                     isNew: false,
 
+                    wholeDay: false,
+
                     datepicker: {
                         options: {
-                            format: 'DD/MM/YYYY',
+                            format: Format.dateFormat,
                             useCurrent: false,
                         }
                     },
                     timepicker: {
                         options: {
-                            format: 'LT'
+                            format: Format.timeFormat
                         }
-                    }
+                    },
+                    typeRange: {
+                        value: 30,
+                        selected: RangeType.MINUTE,
+                        options: [
+                          { value: RangeType.MINUTE, text: 'Минуты' },
+                          { value: RangeType.HOUR, text: 'Часы' },
+                        ]
+                    },
+                    typeInterval: {
+                        value: 30,
+                        selected: RangeType.MINUTE,
+                        options: [
+                          { value: RangeType.MINUTE, text: 'Минуты' },
+                          { value: RangeType.HOUR, text: 'Часы' },
+                        ]
+                    },
                 },
 
                 selectedSlot: null,
@@ -154,10 +198,12 @@
                 this.slots[day.getFullYear()][day.getMonth()][day.getUTCDate()].push(
                     {
                         id: new Date().toString(),
-                        time: '10AM',
+                        timeFrom: '10:00 AM',
+                        timeTo: '12:00 AM',
                         description: 'Новый',
                         period: '1h',
                         countParticipant: 1,
+                        wholeDay: false,
                         date: new Date(day.getFullYear(), day.getMonth(), day.getUTCDate())
                     }
                 );
@@ -166,25 +212,82 @@
 
             handleOk() {
                 if (this.modal.isNew) {
-                    let day = moment.utc(this.modal.date, 'DD/MM/YYYY').toDate();
 
-                    this._initSlot(day);
+                    let daywrapper = moment.utc(this.modal.date, Format.dateFormat);
+                    let day = daywrapper.toDate();
+                    let timeFrom = moment.utc(this.modal.timeFrom, Format.timeFormat);
+                    let timeTo = moment.utc(this.modal.timeTo, Format.timeFormat);
 
-                    this.slots[day.getFullYear()][day.getMonth()][day.getUTCDate()].push(
-                        {
-                            id: new Date().toString(),
-                            time: this.modal.time,
-                            description: this.modal.description,
-                            period: this.modal.period,
-                            countParticipant: this.modal.countParticipant,
-                            date: new Date(day.getFullYear(), day.getMonth(), day.getUTCDate())
+                    if (this.modal.wholeDay) {
+                        let rangeInMinutes = this.modal.typeRange.value;
+                        if (this.modal.typeRange.selected === RangeType.HOUR) {
+                            rangeInMinutes = this.modal.typeRange.value * 60;
                         }
-                    );
+
+                        let intervalInMinutes = this.modal.typeInterval.value;
+                        if (this.modal.typeInterval.selected === RangeType.HOUR) {
+                            intervalInMinutes = this.modal.typeInterval.value * 60;
+                        }
+
+                        let duration = moment.duration(timeTo.diff(timeFrom)).asMinutes();
+
+                        for (let i = 0; i < duration / (rangeInMinutes + intervalInMinutes); i++) {
+                            let timeFrom1 = timeFrom.clone();
+                            let timeFrom2 = timeFrom.clone();
+                            let timeToAddFrom = timeFrom1.add(i * rangeInMinutes + i * intervalInMinutes, 'minutes');
+                            let timeToAddTo = timeFrom2.add((i+1) * rangeInMinutes + i * intervalInMinutes, 'minutes');
+                            let newDateFrom = daywrapper.clone();
+                            let newDateTo = daywrapper.clone();
+                            newDateFrom.set({
+                                hour:   timeToAddFrom.get('hour'),
+                                minute: timeToAddFrom.get('minute'),
+                                second: timeToAddFrom.get('second')
+                            });
+                            newDateTo.set({
+                                hour:   timeToAddTo.get('hour'),
+                                minute: timeToAddTo.get('minute'),
+                                second: timeToAddTo.get('second')
+                            });
+
+                            this._initSlot(day);
+
+                            this.slots[day.getFullYear()][day.getMonth()][day.getUTCDate()].push(
+                                {
+                                    id: new Date().toString(),
+                                    timeFrom: newDateFrom.format(Format.timeFormat),
+                                    timeTo: newDateTo.format(Format.timeFormat),
+                                    description: this.modal.description,
+                                    period: this.modal.period,
+                                    countParticipant: this.modal.countParticipant,
+                                    wholeDay: false,
+                                    date: day
+                                }
+                            );
+                        }
+                    } else {
+                        this._initSlot(day);
+
+                        this.slots[day.getFullYear()][day.getMonth()][day.getUTCDate()].push(
+                            {
+                                id: new Date().toString(),
+                                timeFrom: this.modal.timeFrom,
+                                timeTo: this.modal.timeTo,
+                                description: this.modal.description,
+                                period: this.modal.period,
+                                countParticipant: this.modal.countParticipant,
+                                wholeDay: false,
+                                date: new Date(day.getFullYear(), day.getMonth(), day.getUTCDate())
+                            }
+                        );
+                    }
+
                     this.$forceUpdate();
                 } else {
-                    this.selectedSlot.time = this.modal.time;
+                    this.selectedSlot.timeFrom = this.modal.timeFrom;
+                    this.selectedSlot.timeTo = this.modal.timeTo;
                     this.selectedSlot.description = this.modal.description;
                     this.selectedSlot.period = this.modal.period;
+                    this.selectedSlot.wholeDay = this.modal.wholeDay;
                     this.selectedSlot.countParticipant = this.modal.countParticipant;
                 }
                 this.selectedSlot = null;
@@ -195,9 +298,11 @@
                 this.modal.isNew = false;
                 this.selectedSlot = slot;
 
-                this.modal.time = slot.time;
+                this.modal.timeFrom = slot.timeFrom;
+                this.modal.timeTo = slot.timeTo;
                 this.modal.description = slot.description;
                 this.modal.period = slot.period;
+                this.modal.wholeDay = slot.wholeDay;
                 this.modal.countParticipant = slot.countParticipant;
             },
 
@@ -206,10 +311,12 @@
                 this.modal.isNew = true;
 
                 this.modal.date = '';
-                this.modal.time = '';
+                this.modal.timeFrom = '';
+                this.modal.timeTo = '';
                 this.modal.description = '';
                 this.modal.period = '';
                 this.modal.countParticipant = '';
+                this.modal.wholeDay = false;
                 this.selectedSlot = {};
             }
 
@@ -275,6 +382,8 @@
         margin: 0;
         border-radius: 2px;
         pointer-events: all;
+
+        margin-bottom: 3px;
     }
 
     .primary {
