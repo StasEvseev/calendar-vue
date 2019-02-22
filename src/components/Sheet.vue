@@ -2,7 +2,10 @@
     <div class="month">
       <div class="week" v-for="row in rows()">
         <div class="day" v-for="(day, i) in daysAtRow( row, 7 )">
-           {{day}}
+          <span v-bind:class="[{ today: today.getUTCDate() === day[1].getUTCDate() && today.getMonth() === day[1].getMonth() && today.getFullYear() === day[1].getFullYear()}]">
+            {{day[1].getUTCDate()}}
+          </span>
+
         </div>
 
       </div>
@@ -22,7 +25,8 @@ export default {
     },
 
     props: {
-        days: Array
+        days: Array,
+        today: Date,
     },
     methods: {
         rows()
@@ -78,4 +82,12 @@ export default {
     -1px -1px #F9A440,
     inset -1px -1px 0 0 #F9A440;
 }
+
+  .today {
+    background-color: red;
+    font-weight: bold;
+    color: black;
+    font-size: 17px;
+  }
+
 </style>

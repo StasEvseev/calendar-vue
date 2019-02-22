@@ -2,7 +2,7 @@
   <div id="app">
 
     <Month :month="month" />
-    <Sheet :days="days" />
+    <Sheet :days="days" :today="today" />
 
   </div>
 </template>
@@ -26,25 +26,25 @@ function calculateDays(month, year) {
     let value = lastDayOfPrevMonth.getDate();
 
     if (firstOfMonthWeek === 0) {
-        days[6] = 1;
+        days[6] = [1, new Date(today.getFullYear(), today.getMonth(), 2)];
 
         for (let i = 5; i >= 0; i--) {
-            days[i] = value;
+            days[i] = [value, new Date(today.getFullYear(), today.getMonth() - 1, value + 1)];
             value -= 1;
         }
         value = 1;
 
     } else {
         for (let i = firstOfMonthWeek - 2; i >= 0; i--) {
-            days[i] = value;
+            days[i] = [value, new Date(today.getFullYear(), today.getMonth() - 1, value + 1)];
             value -= 1;
         }
         value = 1;
-        days[firstOfMonthWeek - 1] = value;
+        days[firstOfMonthWeek - 1] = [value, new Date(today.getFullYear(), today.getMonth(), value + 1)];
 
         for (let i = firstOfMonthWeek; i < 7; i++) {
             value += 1;
-            days[i] = value;
+            days[i] = [value, new Date(today.getFullYear(), today.getMonth(), value + 1)];
         }
     }
 
@@ -61,7 +61,12 @@ function calculateDays(month, year) {
             } else {
                 value += 1;
             }
-            days.push(value);
+            if (last_day_passed) {
+                days.push([value, new Date(today.getFullYear(), today.getMonth() + 1, value + 1)]);
+            } else {
+                days.push([value, new Date(today.getFullYear(), today.getMonth(), value + 1)]);
+            }
+
         }
     }
 
@@ -69,15 +74,16 @@ function calculateDays(month, year) {
 }
   let today = new Date();
 
-  let days = calculateDays(today.getMonth() + 1, today.getFullYear());
+  let days = calculateDays(8 + 1, today.getFullYear());
 
-  let obj = {month: today.getMonth(), year: today.getFullYear()};
+  let obj = {month: 8, year: today.getFullYear()};
 
 export default {
   name: 'app',
   data: () => ({
     days: days,
-      month: obj
+      month: obj,
+      today: today,
   }),
     watch:
   {
