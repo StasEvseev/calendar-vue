@@ -25,16 +25,27 @@ function calculateDays(month, year) {
     let days = [0, 0, 0, 0, 0, 0, 0];
     let value = lastDayOfPrevMonth.getDate();
 
-    for (let i = firstOfMonthWeek - 2; i >= 0; i--) {
-        days[i] = value;
-        value -= 1;
-    }
-    value = 1;
-    days[firstOfMonthWeek - 1] = value;
+    if (firstOfMonthWeek === 0) {
+        days[6] = 1;
 
-    for (let i = firstOfMonthWeek; i < 7; i++) {
-        value += 1;
-        days[i] = value;
+        for (let i = 5; i >= 0; i--) {
+            days[i] = value;
+            value -= 1;
+        }
+        value = 1;
+
+    } else {
+        for (let i = firstOfMonthWeek - 2; i >= 0; i--) {
+            days[i] = value;
+            value -= 1;
+        }
+        value = 1;
+        days[firstOfMonthWeek - 1] = value;
+
+        for (let i = firstOfMonthWeek; i < 7; i++) {
+            value += 1;
+            days[i] = value;
+        }
     }
 
     let last_day_passed = false;
@@ -44,7 +55,6 @@ function calculateDays(month, year) {
             if (value === lastDayOfMonthDay) {
                 last_day_passed = true;
                 value = 1;
-                // debugger
                 if (m === 0) {
                     break
                 }
@@ -59,7 +69,7 @@ function calculateDays(month, year) {
 }
   let today = new Date();
 
-  let days = calculateDays(today.getMonth(), today.getFullYear());
+  let days = calculateDays(today.getMonth() + 1, today.getFullYear());
 
   let obj = {month: today.getMonth(), year: today.getFullYear()};
 
