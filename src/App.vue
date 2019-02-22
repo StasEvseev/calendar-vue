@@ -74,7 +74,7 @@
     let today = new Date();
 
     let days = calculateDays(today.getMonth() + 1, today.getFullYear());
-    let slots = {2019: {1: {21: [['10AM', 'meeting']]}}};
+    let slots = {2019: {1: {21: [['ID1', '10AM', 'meeting']]}}};
 
     let obj = {month: today.getMonth(), year: today.getFullYear()};
 
