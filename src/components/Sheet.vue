@@ -11,24 +11,26 @@
         >
             <form @submit.stop.prevent="">
 
-                <b-form-group label="Дата" v-if="isNew">
-                    <datepicker v-if="isNew" v-model="date"></datepicker>
+                <b-form-group label="Дата" v-if="modal.isNew">
+                    <date-picker v-model="modal.date" :config="modal.datepicker.options" />
+                    <!--<datepicker v-if="modal.isNew" v-model="modal.date"></datepicker>-->
                 </b-form-group>
 
                 <b-form-group label="Время">
-                    <b-form-input type="text" placeholder="Время" v-model="time"/>
+                    <date-picker v-model="modal.time" :config="modal.timepicker.options" />
+                    <!--<b-form-input type="text" placeholder="Время" v-model="modal.time"/>-->
                 </b-form-group>
 
                 <b-form-group label="Описание">
-                    <b-form-input type="text" placeholder="Описание" v-model="description"/>
+                    <b-form-input type="text" placeholder="Описание" v-model="modal.description"/>
                 </b-form-group>
 
                 <b-form-group label="Продолжительность">
-                    <b-form-input type="text" placeholder="Продолжительность" v-model="period"/>
+                    <b-form-input type="text" placeholder="Продолжительность" v-model="modal.period"/>
                 </b-form-group>
 
                 <b-form-group label="Количество участников">
-                    <b-form-input type="text" placeholder="Количество участников" v-model="countParticipant"/>
+                    <b-form-input type="text" placeholder="Количество участников" v-model="modal.countParticipant"/>
                 </b-form-group>
 
             </form>
@@ -80,24 +82,40 @@
 
 <script>
     import BFormInput from "bootstrap-vue/src/components/form-input/form-input";
-    import Datepicker from 'vuejs-datepicker';
+    // import Datepicker from 'vuejs-datepicker';
+    import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css';
+    import moment from 'moment'
+
 
     export default {
         name: 'Sheet',
-        components: {BFormInput, Datepicker},
+        components: {BFormInput},
         data() {
             return {
                 counter: 0,
 
                 showModal: false,
 
-                date: '',
-                time: '',
-                description: '',
-                period: '',
-                countParticipant: '',
+                modal: {
+                    date: '',
+                    time: '',
+                    description: '',
+                    period: '',
+                    countParticipant: '',
+                    isNew: false,
 
-                isNew: false,
+                    datepicker: {
+                        options: {
+                            format: 'DD/MM/YYYY',
+                            useCurrent: false,
+                        }
+                    },
+                    timepicker: {
+                        options: {
+                            format: 'LT'
+                        }
+                    }
+                },
 
                 selectedSlot: null,
             }
@@ -147,50 +165,51 @@
             },
 
             handleOk() {
-                if (this.isNew) {
-                    let day = this.date;
+                if (this.modal.isNew) {
+                    let day = moment.utc(this.modal.date, 'DD/MM/YYYY').toDate();
+
                     this._initSlot(day);
 
                     this.slots[day.getFullYear()][day.getMonth()][day.getUTCDate()].push(
                         {
                             id: new Date().toString(),
-                            time: this.time,
-                            description: this.description,
-                            period: this.period,
-                            countParticipant: this.countParticipant,
+                            time: this.modal.time,
+                            description: this.modal.description,
+                            period: this.modal.period,
+                            countParticipant: this.modal.countParticipant,
                             date: new Date(day.getFullYear(), day.getMonth(), day.getUTCDate())
                         }
                     );
                     this.$forceUpdate();
                 } else {
-                    this.selectedSlot.time = this.time;
-                    this.selectedSlot.description = this.description;
-                    this.selectedSlot.period = this.period;
-                    this.selectedSlot.countParticipant = this.countParticipant;
+                    this.selectedSlot.time = this.modal.time;
+                    this.selectedSlot.description = this.modal.description;
+                    this.selectedSlot.period = this.modal.period;
+                    this.selectedSlot.countParticipant = this.modal.countParticipant;
                 }
                 this.selectedSlot = null;
             },
 
             showEditorWindow(slot) {
                 this.showModal = true;
-                this.isNew = false;
+                this.modal.isNew = false;
                 this.selectedSlot = slot;
 
-                this.time = slot.time;
-                this.description = slot.description;
-                this.period = slot.period;
-                this.countParticipant = slot.countParticipant;
+                this.modal.time = slot.time;
+                this.modal.description = slot.description;
+                this.modal.period = slot.period;
+                this.modal.countParticipant = slot.countParticipant;
             },
 
             createNewSlot() {
                 this.showModal = true;
-                this.isNew = true;
+                this.modal.isNew = true;
 
-                this.date = '';
-                this.time = '';
-                this.description = '';
-                this.period = '';
-                this.countParticipant = '';
+                this.modal.date = '';
+                this.modal.time = '';
+                this.modal.description = '';
+                this.modal.period = '';
+                this.modal.countParticipant = '';
                 this.selectedSlot = {};
             }
 

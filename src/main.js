@@ -8,13 +8,18 @@ import 'material-design-icons-iconfont/dist/material-design-icons.css'
 import 'dayspan-vuetify/dist/lib/dayspan-vuetify.min.css'
 import "bootstrap/dist/css/bootstrap.min.css"
 import "bootstrap-vue/dist/bootstrap-vue.css"
+import datePicker from 'vue-bootstrap-datetimepicker';
 
 import BootstrapVue from 'bootstrap-vue'
+import VueMoment from 'vue-moment'
 // import Datepicker from 'vuejs-datepicker';
 
-Vue.use(BootstrapVue)
+Vue.use(BootstrapVue);
+Vue.use(datePicker);
+Vue.use(VueMoment)
 
-Vue.config.productionTip = false
+
+Vue.config.productionTip = false;
 
 
 new Vue({
